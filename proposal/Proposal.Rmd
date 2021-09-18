@@ -1,0 +1,227 @@
+---
+title: "Yet Another COVID Analysis - Final Project Proposal"
+author: "Charles Beyer and Tyler Bybee"
+date: '20 July 2020'
+output:
+  html_document: 
+    theme: readable
+    toc: yes
+  pdf_document: default
+urlcolor: cyan
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 100, fig_height = 8, fig_width = 30) 
+
+boolDebug = FALSE        
+
+```
+
+```{r supportFunctions, include = boolDebug, message = boolDebug, warning = boolDebug}
+# Added parameters to disable output for knitr, etc. 
+
+
+#Expanded functionality to validate Package Installation State
+#ccbeyer2 
+
+
+#------------------------------------------------------------------------------
+# isInstalled - Checks to determine if the specified R Package has 
+#               been installed.  
+#
+# Inputs:
+#           packageName - Single string value of a package
+#
+# Output: 
+#           Boolean - TRUE = Package present / FALSE = Package not present
+#
+# Notes :   Could add more logic, but this is good enough for intended purpose
+#----------------------------------------------------------------------------- 
+
+isInstalled = function(packageName)
+{
+    #Get a list of installed packages on your machine 
+    dfPackages = as.data.frame(installed.packages()[,c(1,3)])
+
+    #Check if the Package passed to function exists in the list of installed packages
+    ifelse(any(dfPackages$Package == packageName), TRUE, FALSE)
+}
+
+
+
+#------------------------------------------------------------------------------
+# getPackageVersion  - Checked Installed.Packages for specified package name
+#                      and returns version 
+#
+# Inputs:
+#           packageName - Single string value of a package
+#
+# Output: 
+#           String - Version Number / (or NULL if not found)
+#
+# Notes :   Could add more logic, but this is good enough for intended purpose
+#----------------------------------------------------------------------------- 
+
+getPackageVersion = function(packageName)
+{
+    #Get a list of installed packages on your machine 
+    dfPackages = as.data.frame(installed.packages()[,c(1,3)])
+
+    #Check if the Package passed to function exists in the list of installed packages
+    if (any(dfPackages$Package == packageName))
+    {
+        #print ("found version")
+        #Module Found, get verison and return 
+        return (dfPackages[dfPackages$Package==packageName, c("Version")])
+    }
+}
+
+
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+# validatePackages  -  Processes a list of packages and determines if they are
+#                      Installed or not.  Attempts to install missing packages
+#
+# Inputs:
+#           packageNames - Single string / list of package names
+#
+# Output: 
+#           STDOUT - Output displayed to screen indicating success/failure
+#
+# Notes :   Should make this a return value, but .... future TO DO
+#----------------------------------------------------------------------------- 
+
+validatePackages = function(packageNames)
+{
+  
+  #Print Header
+  print ("-------------------- Required Package Validation  Check ---------------------------")
+  
+  #Iterate through requried packages and verify if they are installed
+  for(i in 1:length(packageNames))
+  {
+      #Simplify comparisons below
+      if(isInstalled(packageNames[i]))
+      {
+          #Package Exists 
+          #Silly way to print a string, but thanks R 
+          print(sprintf("   Package [%s] is already installed, currevent version is [%s]",packageNames[i],getPackageVersion(packageNames[i])))
+          
+      }
+      else
+      {
+          #Package Does Not Exist, install it
+          #   NOTE - There are a lot of potential installation configuration options.....
+          #          This is just a simply PoC
+  
+          #Silly way to print a string, but thanks R 
+          print(sprintf("   Package [%s] is not installed, attempting to install",packageNames[i]))
+  
+          #Trigger basic installation
+          install.packages(packageNames[i])
+  
+          #Do another check to see if this has been installed.
+          if(isInstalled(packageNames[i]))        
+          {
+                #Installed successfully since it is now in installed.packages list. 
+                print(sprintf("        [%s] is now installed, version is
+                              [%s]",packageNames[i],getPackageVersion(packageNames[i])))
+            
+          }
+          else
+          {
+                #Something went wrong as it is still not in the list, so give a warning
+                print(sprintf("        [WARNING!!!] [%s] failed to install.  Please see output above this message for more information!  Your project may not work properly without this package!",packageNames[i]))
+            
+          }  
+        
+      }
+  } 
+}
+  
+ 
+```
+
+
+
+
+
+
+## 1 Team Members
+
+Charles Beyer (ccbeyer2) and Tyler Bybee (tbybee2)
+
+## 2 Project Name
+
+Yet Another COVID Analysis (YACA)
+
+## 3 Data Description
+
+The Coronavirus Source data file (owid-covid-data) is published and maintained by Our World in Data.  The dataset, which is updated daily, includes data pertaining to worldwide COVID confirmed cases, deaths, as well as various testing and hospitalization measures.
+
+Some of the key variables in this file are:
+
+- Total & New Cases / Deaths 
+- Country Population
+- Region
+- Population Density
+- Median Age
+- GDP (per capita)
+- Diabetes prevalence
+- Extreme Poverty Indicator
+- Smoking
+- Handwashing facilities
+- Hospital Beds
+- Government Response to Virus
+
+## 4 Background Information
+
+A high level overview of the data/providers can be found at : https://ourworldindata.org/coronavirus-source-data
+<br />
+The data, which is updated daily, can be found via GitHub:  https://github.com/owid/covid-19-data/tree/master/public/data/
+
+## 5 Statement of Personal/Scientific Interest
+
+While there is a plethora of information about COVID-19 online, it is hard to know how accurate the information presented to us is, from various sources.  By analyzing the data ourselves, we can become better informed about the current pandemic and test our skills on real-world, current data.  We hope to learn insight about how different countries’ circumstances and responses to the outbreak affected their outcomes, with minimal external bias.
+
+We hope to create smaller models that explain some of the factors that affect the number of COVID-19 cases and deaths, while accounting for the assumptions of linear models.  By using cross-validation, training and testing data sets, and variable selection, we hope to build accurate models which eliminate collinearity. However, due to the fact that data is time-based, we think it would be difficult or impossible with our current knowledge level to build a large, accurate, predictive model without  invalidating the assumptions of the linear model.
+
+
+## 6 Sample of Loaded Data
+
+```{r message=FALSE, warning=FALSE, echo = FALSE}
+covid_data = read.csv("owid-covid-data.csv", stringsAsFactors = TRUE)
+
+
+#Create a list of required packages for this assignment
+lstReqPackages = c("knitr","kableExtra")
+
+#Validate Packages
+validatePackages(lstReqPackages)
+
+#Activate Packages 
+for(pckg in lstReqPackages){ library(pckg,character.only = TRUE)}
+
+
+```
+
+```{r ShowStructure, message=FALSE, warning=FALSE, results="hold", echo = FALSE, out.width="120%"}
+#Show the structure of the data file 
+cat(" *************************** Structure of owid-covid-data File *************************** ", "\n\n")
+str(covid_data)
+```
+
+```{r ShowSampleRows, message=FALSE, warning=FALSE, results="hold", echo = FALSE, out.width="120%"}
+cat(" *************************** Sample Data from owid-covid-data File ***************************  ", "\n\n")
+
+
+kable(covid_data[sample(nrow(covid_data), 50),]) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))  %>%
+  scroll_box(width = "100%", height = "750px")
+
+
+```
+
+
