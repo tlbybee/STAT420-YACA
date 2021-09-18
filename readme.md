@@ -1,6 +1,9 @@
 Yet Another COVID Analysis (YACA)
+
 STAT420 Summer 2020 - Final Project
+
 Tyler Bybee (tbybee2@illinois.edu) and Charles Beyer (ccbeyer2@illinois.edu)
+
 8/6/2020
 
 For full report check out "Yet Another COVID Analysis.html."
